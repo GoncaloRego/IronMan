@@ -3,12 +3,37 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
+#include <vector>
 #include <iostream>
 
+#include "Camera.h"
+#include "ObjLoader.h"
+
+unsigned int programID;
+
+unsigned int vertexBuffer;
+unsigned int uvBuffer;
+unsigned int normalBuffer;
+unsigned int elementBuffer;
+
+unsigned int vertexArrayID;
+
+unsigned int matrixID;
+unsigned int viewMatrixID;
+unsigned int modelMatrixID;
+
+std::vector< glm::vec3 > vertices;
+std::vector< glm::vec2 > uvs;
+std::vector< glm::vec3 > normals;
+
+std::vector<unsigned short> indices;
+std::vector<glm::vec3> indexed_vertices;
+std::vector<glm::vec2> indexed_uvs;
+std::vector<glm::vec3> indexed_normals;
+
+ObjLoader objLoader;
+
 //Camera & Matrices
-
-
 //Identity Matrix
 glm::mat4 identity(1.0f);
 
@@ -69,17 +94,22 @@ int main(void)
 	if (glewInit() != GLEW_OK)
 		exit(EXIT_FAILURE);
 
+	//Initialization();
 
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-
-	
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
+
+		glBegin(GL_TRIANGLES);
+		glVertex2f(-0.5f, -0.5f);
+		glVertex2f( 0.0f,  0.5f);
+		glVertex2f( 0.5f, -0.5f);
+		glEnd();
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
@@ -88,11 +118,18 @@ int main(void)
         glfwPollEvents();
     }
 
+	//Clean VBO and Shader
+	glDeleteBuffers(1, &vertexBuffer);
+	glDeleteBuffers(1, &uvBuffer);
+	glDeleteBuffers(1, &normalBuffer);
+	glDeleteProgram(programID);
+	glDeleteVertexArrays(1, &vertexArrayID);
+
     glfwTerminate();
     return 0;
 }
 
-void Initialization()
+void Initialization(void)
 {
 	// Background
 	glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
@@ -104,6 +141,17 @@ void Initialization()
 	// Cull triangles which normal is not towards the camera
 	glEnable(GL_CULL_FACE);
 
-	/*glGenVertexArrays(1, &vertexArrayID);
-	glBindVertexArray(vertexArrayID);*/
+	glGenVertexArrays(1, &vertexArrayID);
+	glBindVertexArray(vertexArrayID);
+
+	// Read our .obj file
+	bool obj = objLoader.loadOBJ("Model/Iron_Man.obj", vertices, uvs, normals);
+
+	// Create and compile our GLSL program from the shaders
+	//programID = LoadShaders("shaders/triangles.vert", "shaders/triangles.frag");
+
+	// Get a handle for our "MVP" uniform
+	matrixID = glGetUniformLocation(programID, "MVP");
+	viewMatrixID = glGetUniformLocation(programID, "V");
+	modelMatrixID = glGetUniformLocation(programID, "M");
 }
