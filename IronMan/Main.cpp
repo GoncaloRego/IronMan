@@ -1,8 +1,12 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <iostream>
+#include <vector>
+
 #include "ObjLoader.h"
 #include "LoadShaders.h"
+#include "stb_image.h"
 
 ObjLoader objLoader;
 LoadShaders shader;
@@ -17,6 +21,8 @@ std::vector< glm::vec3 > normals;
 
 unsigned int VertexArrayID;
 unsigned int vertexbuffer;
+
+unsigned int textureID;
 
 glm::mat4 Projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
 
@@ -76,7 +82,7 @@ int main(void)
 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
 
-	GLuint programID = shader.loadShaders("SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader");
+	GLuint programID = shader.loadShaders("shaders/SimpleVertexShader.vertexshader", "shaders/SimpleFragmentShader.fragmentshader");
 
 	unsigned int MatrixID = glGetUniformLocation(programID, "MVP");
 
@@ -118,4 +124,30 @@ int main(void)
 
 	glfwTerminate();
 	return 0;
+}
+
+//ainda não está a ser usada
+void loadTexture(std::string textureFile)
+{
+	glGenTextures(1, &textureID);
+
+	// Bind the newly created texture
+	glBindTexture(GL_TEXTURE_2D, textureID);
+
+	glUniform1i(textureID, 0);
+
+	// Nice trilinear filtering.
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+	// Activates image inversion
+	stbi_set_flip_vertically_on_load(true);
+
+	int width, height, nChannels;
+	unsigned char *imageData = stbi_load(textureFile.c_str(), &width, &height, &nChannels, 0);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
+
+	// Frees the image from memory
+	stbi_image_free(imageData);
 }
