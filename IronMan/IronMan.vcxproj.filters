@@ -24,12 +24,18 @@
     <ClCompile Include="ObjLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LoadShaders.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ObjLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadShaders.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -40,5 +46,7 @@
     <None Include="shaders\triangles.vert">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="SimpleVertexShader.vertexshader" />
+    <None Include="SimpleFragmentShader.fragmentshader" />
   </ItemGroup>
 </Project>
