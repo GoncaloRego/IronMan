@@ -19,15 +19,18 @@ std::vector< glm::vec3 > vertices;
 std::vector< glm::vec2 > uvs;
 std::vector< glm::vec3 > normals;
 
-unsigned int VertexArrayID;
-unsigned int vertexbuffer;
+GLuint VertexArrayID;
+GLuint vertexbuffer;
 
-unsigned int textureID;
+GLuint textureID;
+
+std::string imagepath = "Model/Iron_Man_D.tga";
 
 glm::mat4 Projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
 
 // Camera matrix
-glm::mat4 View = glm::lookAt(
+glm::mat4 View = glm::lookAt
+(
 	glm::vec3(4, 3, 3), // Camera is at (4,3,3), in World Space
 	glm::vec3(0, 0, 0), // and looks at the origin
 	glm::vec3(0, 1, 0)  // Head is up (set to 0,-1,0 to look upside-down)
@@ -44,6 +47,7 @@ GLFWwindow* window;
 
 int main(void)
 {
+
 	/* Initialize the library */
 	if (!glfwInit())
 		return -1;
@@ -77,18 +81,43 @@ int main(void)
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 
-	//bool ironMan = objLoader.loadOBJ("Model/Iron_Man.obj", vertices, uvs, normals);
-	//glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
-
 	glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
 
+	//bool ironMan = objLoader.loadOBJ("Model/Iron_Man.obj", vertices, uvs, normals);
+	//bool gun = objLoader.loadOBJ("Gun/gm.obj", vertices, uvs, normals);
+	//glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+	
 	GLuint programID = shader.loadShaders("shaders/SimpleVertexShader.vertexshader", "shaders/SimpleFragmentShader.fragmentshader");
 
-	unsigned int MatrixID = glGetUniformLocation(programID, "MVP");
+	//LoadTexture("Model/Iron_Man_D.tga");
+	//LOAD TEXTURE
+	/*glGenTextures(1, &textureID);
+
+	// Bind the newly created texture
+	glBindTexture(GL_TEXTURE_2D, textureID);
+
+	glUniform1i(textureID, 0);
+
+	// Nice trilinear filtering.
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+	// Activates image inversion
+	stbi_set_flip_vertically_on_load(true);
+
+	int width, height, nChannels;
+	unsigned char *imageData = stbi_load(imagepath.c_str(), &width, &height, &nChannels, 0);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
+
+	// Frees the image from memory
+	stbi_image_free(imageData);*/
+
+
+	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
 
 	do
 	{
-		// Clear the screen. It's not mentioned before Tutorial 02, but it can cause flickering, so it's there nonetheless.
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glEnableVertexAttribArray(0);
@@ -150,4 +179,27 @@ void loadTexture(std::string textureFile)
 
 	// Frees the image from memory
 	stbi_image_free(imageData);
+}
+
+GLuint loadTGA_glfw(const char * imagepath) {
+
+	// Create one OpenGL texture
+	GLuint textureID;
+	glGenTextures(1, &textureID);
+
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, textureID);
+
+	// Read the file, call glTexImage2D with the right parameters
+	//glfwLoadTexture2D(imagepath, 0);
+
+	// Nice trilinear filtering.
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	// Return the ID of the texture we just created
+	return textureID;
 }
